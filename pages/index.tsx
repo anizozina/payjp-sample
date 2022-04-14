@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
+
   const [payjp, setPayjp] = useState<any>(null)
   const [elements, setElements] = useState<any>(null)
   const [result, setResult] = useState<string>()
@@ -39,7 +40,7 @@ const Home: NextPage = () => {
           setResult(error)
           return
         }
-        const token = response as {id: string}
+        const token = response as { id: string }
         setResult(token.id)
       })
       .catch((error: Error) => {
@@ -48,7 +49,18 @@ const Home: NextPage = () => {
       })
     event.preventDefault()
   }, [payjp, elements])
-  
+
+  const [charge, setCharge] = useState();
+  const createCharge = useCallback(async (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    const response = await fetch('/api/card/1', {
+      method: 'POST',
+      body: JSON.stringify({ token: result })
+    });
+    const data = await response.json();
+    setCharge(data)
+    event.preventDefault()
+  }, [result]);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -64,6 +76,14 @@ const Home: NextPage = () => {
           <button onClick={handleClick}>トークン作成</button>
           <span id="token">{result}</span>
         </div>
+        {result && (
+          <div style={{ width: '70%', padding: '4px' }}>
+            <button onClick={createCharge}>支払い作成</button>
+            <div>
+              <span>{JSON.stringify(charge)}</span>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )
